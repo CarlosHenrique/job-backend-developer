@@ -6,7 +6,9 @@
         "build:back": "docker compose build nestjs-app",
         "start:db": "docker compose up mysql-db",
         "start:back": "docker compose up nestjs-app --renew-anon-volumes",
-        "clean": "docker compose down -v"
+        "clean": "docker compose down -v",
+        "stop": "docker compose down",
+        "start": "docker compose up"
     },
     "author": "",
     "license": "ISC"
