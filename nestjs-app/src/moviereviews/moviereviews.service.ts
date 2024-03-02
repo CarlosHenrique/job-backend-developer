@@ -70,6 +70,18 @@ export class MoviereviewsService {
     }
   }
 
+  async getReviewById(id: string): Promise<MovieReview> {
+    try {
+      const found = await this.movieReviewRepository.findOneBy({ id });
+      if (!found) {
+        throw new RepositoryGenericError('Error getting reviews from database');
+      }
+      return found;
+    } catch (err) {
+      throw new RepositoryGenericError('Error getting reviews from database');
+    }
+  }
+
   private constructWhere(
     query: SelectQueryBuilder<MovieReview>,
     filter: GetMovieReviewsFilterDto,
