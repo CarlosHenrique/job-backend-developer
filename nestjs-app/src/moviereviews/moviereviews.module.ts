@@ -7,6 +7,6 @@ import { MoviereviewsService } from './moviereviews.service';
 @Module({
   imports: [TypeOrmModule.forFeature([MovieReview]), OmdbModule],
   controllers: [MoviereviewsController],
-  providers: [MoviereviewsService,]
+  providers: [MoviereviewsService],
 })
-export class MoviereviewsModule { }
+export class MoviereviewsModule {}

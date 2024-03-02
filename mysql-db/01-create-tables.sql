@@ -13,5 +13,6 @@ CREATE TABLE movie_reviews(
    metascore VARCHAR(3) NOT NULL,
    imdbRating VARCHAR(4) NOT NULL,
    imdbVotes VARCHAR(255) NOT NULL,
-   country VARCHAR(255) NOT NULL
+   country VARCHAR(255) NOT NULL,
+   released VARCHAR(255) NOT NULL
 );

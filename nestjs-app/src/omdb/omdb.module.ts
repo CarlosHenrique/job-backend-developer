@@ -3,6 +3,6 @@ import { OmdbService } from './omdb.service';
 
 @Module({
   providers: [OmdbService],
-  exports: [OmdbService]
+  exports: [OmdbService],
 })
-export class OmdbModule { }
+export class OmdbModule {}
