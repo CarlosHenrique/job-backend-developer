@@ -11,6 +11,7 @@ import {
 } from './dtos/get-movie-reviews.dto';
 import { MovieReview } from './entities/movie-review';
 import { mapToMovieReview } from './mappers/map-movieapi-to-moviereview';
+import { RepositoryGenericError } from 'src/utils/repository-generic-error';
 
 export interface PageResult<T> {
   data: T[];
@@ -43,7 +44,7 @@ export class MoviereviewsService {
 
       return created;
     } catch (err) {
-      throw new Error('Error creating review from database');
+      throw new RepositoryGenericError('Error creating review from database');
     }
   }
 
@@ -65,7 +66,7 @@ export class MoviereviewsService {
         currentPage: pageNumber,
       };
     } catch (err) {
-      throw new Error('Error getting reviews from database');
+      throw new RepositoryGenericError('Error getting reviews from database');
     }
   }
 
