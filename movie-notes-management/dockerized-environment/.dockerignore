@@ -1,0 +1,6 @@
+.env
+docker
+dockerized-full-stack-environment@1.0
+
+#.dockerignore 
+.env
