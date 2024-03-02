@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { CreateMovieReviewDomainDto } from './dtos/create-movie-review.dto';
 import {
   GetMovieReviewsFilterDto,
@@ -24,5 +24,10 @@ export class MoviereviewsController {
     @Query() page: PaginationDto,
   ): Promise<PageResult<MovieReview>> {
     return this.movieReviewService.getReviews(filter, page);
+  }
+
+  @Get('/:id')
+  getReviewById(@Param('id') id: string): Promise<MovieReview> {
+    return this.movieReviewService.getReviewById(id);
   }
 }
