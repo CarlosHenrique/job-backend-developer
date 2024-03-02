@@ -4,13 +4,19 @@ import { randomUUID } from 'crypto';
 import { OmdbService } from 'src/omdb/omdb.service';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { CreateMovieReviewDomainDto } from './dtos/create-movie-review.dto';
-import { GetMovieReviewsFilterDto } from './dtos/get-movie-reviews.dto';
+import {
+  DefaultPageable,
+  GetMovieReviewsFilterDto,
+  PaginationDto,
+} from './dtos/get-movie-reviews.dto';
 import { MovieReview } from './entities/movie-review';
 import { mapToMovieReview } from './mappers/map-movieapi-to-moviereview';
 
 export interface PageResult<T> {
   data: T[];
   total: number;
+  totalPages?: number;
+  currentPage?: number;
 }
 
 @Injectable()
@@ -43,12 +49,24 @@ export class MoviereviewsService {
 
   async getReviews(
     filter: GetMovieReviewsFilterDto,
+    page: PaginationDto = DefaultPageable,
   ): Promise<PageResult<MovieReview>> {
-    let query = this.movieReviewRepository.createQueryBuilder('movieReviews');
-    query = this.constructWhere(query, filter);
-    const [data, total] = await query.getManyAndCount();
+    try {
+      const { pageNumber, pageSize } = page;
+      let query = this.movieReviewRepository.createQueryBuilder('movieReviews');
+      query = this.constructWhere(query, filter);
+      query.skip(pageSize * (pageNumber - 1)).take(pageSize);
+      const [data, total] = await query.getManyAndCount();
 
-    return { data, total };
+      return {
+        data,
+        total,
+        totalPages: Math.ceil(total / pageSize),
+        currentPage: pageNumber,
+      };
+    } catch (err) {
+      throw new Error('Error getting reviews from database');
+    }
   }
 
   private constructWhere(
