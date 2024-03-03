@@ -82,6 +82,18 @@ export class MoviereviewsService {
     }
   }
 
+  async deleteReviewById(id: string): Promise<void> {
+    try {
+      const result = await this.movieReviewRepository.delete({ id });
+      if (result.affected === 0) {
+        throw new RepositoryGenericError('Error deleting review from database');
+      }
+      return;
+    } catch (err) {
+      throw new RepositoryGenericError('Error getting reviews from database');
+    }
+  }
+
   private constructWhere(
     query: SelectQueryBuilder<MovieReview>,
     filter: GetMovieReviewsFilterDto,

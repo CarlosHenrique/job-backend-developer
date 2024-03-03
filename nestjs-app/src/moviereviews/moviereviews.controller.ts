@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { CreateMovieReviewDomainDto } from './dtos/create-movie-review.dto';
 import {
   GetMovieReviewsFilterDto,
@@ -29,5 +37,10 @@ export class MoviereviewsController {
   @Get('/:id')
   getReviewById(@Param('id') id: string): Promise<MovieReview> {
     return this.movieReviewService.getReviewById(id);
+  }
+
+  @Delete('/:id')
+  deleteReviewById(@Param('id') id: string): Promise<void> {
+    return this.movieReviewService.deleteReviewById(id);
   }
 }
