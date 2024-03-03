@@ -101,7 +101,7 @@ export class MoviereviewsService {
   ): Promise<MovieReview> {
     try {
       const { notes } = data;
-      console.log(notes);
+
       const found = await this.movieReviewRepository.findOne({
         where: { id },
       });
@@ -109,7 +109,7 @@ export class MoviereviewsService {
         throw new RepositoryGenericError('Review not found on database');
       }
       found.notes = notes;
-      console.log(found);
+
       return await this.movieReviewRepository.save(found);
     } catch (err) {
       throw new RepositoryGenericError('Error updating review from database');
