@@ -4,11 +4,7 @@ import { randomUUID } from 'crypto';
 import { OmdbService } from 'src/omdb/omdb.service';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { CreateMovieReviewDomainDto } from './dtos/create-movie-review.dto';
-import {
-  DefaultPageable,
-  GetMovieReviewsFilterDto,
-  PaginationDto,
-} from './dtos/get-movie-reviews.dto';
+import { GetMovieReviewsQueryDto } from './dtos/get-movie-reviews.dto';
 import { MovieReview } from './entities/movie-review';
 import { mapToMovieReview } from './mappers/map-movieapi-to-moviereview';
 import { RepositoryGenericError } from 'src/utils/repository-generic-error';
@@ -50,14 +46,17 @@ export class MoviereviewsService {
   }
 
   async getReviews(
-    filter: GetMovieReviewsFilterDto,
-    page: PaginationDto = DefaultPageable,
+    queryDto: GetMovieReviewsQueryDto,
   ): Promise<PageResult<MovieReview>> {
     try {
-      const { pageNumber, pageSize } = page;
+      const { pageNumber, pageSize } = queryDto;
+
       let query = this.movieReviewRepository.createQueryBuilder('movieReviews');
-      query = this.constructWhere(query, filter);
+
+      query = this.constructWhere(query, queryDto);
+
       query.skip(pageSize * (pageNumber - 1)).take(pageSize);
+
       const [data, total] = await query.getManyAndCount();
 
       return {
@@ -118,9 +117,9 @@ export class MoviereviewsService {
 
   private constructWhere(
     query: SelectQueryBuilder<MovieReview>,
-    filter: GetMovieReviewsFilterDto,
+    dto: GetMovieReviewsQueryDto,
   ): SelectQueryBuilder<MovieReview> {
-    const { sortRating, sortRelease, search } = filter;
+    const { sortRating, sortRelease, search } = dto;
 
     if (search) {
       query.andWhere(
