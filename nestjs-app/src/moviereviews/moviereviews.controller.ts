@@ -9,10 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CreateMovieReviewDomainDto } from './dtos/create-movie-review.dto';
-import {
-  GetMovieReviewsFilterDto,
-  PaginationDto,
-} from './dtos/get-movie-reviews.dto';
+import { GetMovieReviewsQueryDto } from './dtos/get-movie-reviews.dto';
 import { MoviereviewsService, PageResult } from './moviereviews.service';
 import { MovieReview } from './entities/movie-review';
 import { UpdateMovieReviewDto } from './dtos/update-movie-review.dto';
@@ -23,17 +20,18 @@ export class MoviereviewsController {
 
   @Post()
   createReview(
-    @Body() createMovieReviewDto: CreateMovieReviewDomainDto,
+    @Body()
+    createMovieReviewDto: CreateMovieReviewDomainDto,
   ): Promise<MovieReview> {
     return this.movieReviewService.createReview(createMovieReviewDto);
   }
 
   @Get()
   getReviews(
-    @Query() filter: GetMovieReviewsFilterDto,
-    @Query() page: PaginationDto,
+    @Query()
+    filter: GetMovieReviewsQueryDto,
   ): Promise<PageResult<MovieReview>> {
-    return this.movieReviewService.getReviews(filter, page);
+    return this.movieReviewService.getReviews(filter);
   }
 
   @Get('/:id')
