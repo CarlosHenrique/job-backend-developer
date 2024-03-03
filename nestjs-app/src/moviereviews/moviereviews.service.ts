@@ -12,6 +12,7 @@ import {
 import { MovieReview } from './entities/movie-review';
 import { mapToMovieReview } from './mappers/map-movieapi-to-moviereview';
 import { RepositoryGenericError } from 'src/utils/repository-generic-error';
+import { UpdateMovieReviewDto } from './dtos/update-movie-review.dto';
 
 export interface PageResult<T> {
   data: T[];
@@ -74,11 +75,11 @@ export class MoviereviewsService {
     try {
       const found = await this.movieReviewRepository.findOneBy({ id });
       if (!found) {
-        throw new RepositoryGenericError('Error getting reviews from database');
+        throw new RepositoryGenericError('Error getting review from database');
       }
       return found;
     } catch (err) {
-      throw new RepositoryGenericError('Error getting reviews from database');
+      throw new RepositoryGenericError('Error getting review from database');
     }
   }
 
@@ -90,7 +91,28 @@ export class MoviereviewsService {
       }
       return;
     } catch (err) {
-      throw new RepositoryGenericError('Error getting reviews from database');
+      throw new RepositoryGenericError('Error deleting review from database');
+    }
+  }
+
+  async updateMovieReviewNotes(
+    id: string,
+    data: UpdateMovieReviewDto,
+  ): Promise<MovieReview> {
+    try {
+      const { notes } = data;
+
+      const found = await this.movieReviewRepository.findOne({
+        where: { id },
+      });
+      if (!found) {
+        throw new RepositoryGenericError('Review not found on database');
+      }
+      found.notes = notes;
+
+      return await this.movieReviewRepository.save(found);
+    } catch (err) {
+      throw new RepositoryGenericError('Error updating review from database');
     }
   }
 

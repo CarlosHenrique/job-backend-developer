@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
@@ -14,6 +15,7 @@ import {
 } from './dtos/get-movie-reviews.dto';
 import { MoviereviewsService, PageResult } from './moviereviews.service';
 import { MovieReview } from './entities/movie-review';
+import { UpdateMovieReviewDto } from './dtos/update-movie-review.dto';
 
 @Controller('movie-reviews')
 export class MoviereviewsController {
@@ -42,5 +44,16 @@ export class MoviereviewsController {
   @Delete('/:id')
   deleteReviewById(@Param('id') id: string): Promise<void> {
     return this.movieReviewService.deleteReviewById(id);
+  }
+
+  @Patch('/:id')
+  updateReviewById(
+    @Param('id') id: string,
+    @Body() updateMovieReviewDto: UpdateMovieReviewDto,
+  ): Promise<MovieReview> {
+    return this.movieReviewService.updateMovieReviewNotes(
+      id,
+      updateMovieReviewDto,
+    );
   }
 }
