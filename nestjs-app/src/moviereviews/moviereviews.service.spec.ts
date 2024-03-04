@@ -10,6 +10,7 @@ import { OmdbMovieResponse } from '../omdb/entities/omdb';
 import { dummyMovieReviews } from './entities/dummy-movie-reviews';
 import { dummyOmdbResponse } from '../omdb/entities/dummy-omdb-response';
 import { GetMovieReviewsQueryDto } from './dtos/get-movie-reviews.dto';
+import { ConflictException } from '@nestjs/common';
 
 describe('MoviereviewsService', () => {
     let movieReviewService: MoviereviewsService;
@@ -52,6 +53,9 @@ describe('MoviereviewsService', () => {
                 title: 'King Kong',
                 notes: 'test notes',
             };
+            mockMovieReviewRepository.findOne = jest
+                .fn()
+                .mockResolvedValue(null);
             mockMovieReviewRepository.save = jest
                 .fn()
                 .mockImplementation((movieReview) =>
@@ -65,7 +69,9 @@ describe('MoviereviewsService', () => {
             );
             expect(result).toBeDefined();
             expect(mockMovieReviewRepository.save).toHaveBeenCalled();
-
+            expect(mockMovieReviewRepository.findOne).toHaveBeenCalledWith({
+                where: { title: 'King Kong' },
+            });
             expect(result).toEqual(
                 expect.objectContaining({
                     title: 'King Kong',
@@ -73,6 +79,32 @@ describe('MoviereviewsService', () => {
                     notes: 'test notes',
                 }),
             );
+        });
+
+        it('should throw ConflictException if a review for the movie already exists', async () => {
+            const createDto: CreateMovieReviewDomainDto = {
+                title: 'King Kong',
+                notes: 'Another test notes',
+            };
+
+            mockMovieReviewRepository.findOne = jest.fn().mockResolvedValue({
+                id: 'existing-review-id',
+                title: 'King Kong',
+            });
+            mockMovieReviewRepository.save = jest.fn();
+            await expect(
+                movieReviewService.createReview(createDto),
+            ).rejects.toThrow(ConflictException);
+
+            expect(mockOmdbService.searchMovies).toHaveBeenCalledWith(
+                createDto.title,
+            );
+
+            expect(mockMovieReviewRepository.findOne).toHaveBeenCalledWith({
+                where: { title: 'King Kong' },
+            });
+
+            expect(mockMovieReviewRepository.save).not.toHaveBeenCalled();
         });
     });
 
@@ -216,7 +248,7 @@ describe('MoviereviewsService', () => {
                 movieReviewService.updateMovieReviewNotes(nonExistingId, {
                     notes: 'New notes',
                 }),
-            ).rejects.toThrow('Error updating review from database');
+            ).rejects.toThrow('Review not found on database');
         });
     });
 });
