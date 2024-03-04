@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+    ConflictException,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
 import { OmdbService } from '../omdb/omdb.service';
@@ -32,7 +36,16 @@ export class MoviereviewsService {
             const { title, notes } = createReviewArgs;
 
             const omdbFoundData = await this.omdbService.searchMovies(title);
-
+            const exists = await this.movieReviewRepository.findOne({
+                where: {
+                    title: omdbFoundData.Title,
+                },
+            });
+            if (exists) {
+                throw new ConflictException(
+                    'A review for this movie already exists.',
+                );
+            }
             const mappedReview = mapToMovieReview(omdbFoundData, notes);
 
             const created = await this.movieReviewRepository.save({
@@ -42,9 +55,13 @@ export class MoviereviewsService {
 
             return created;
         } catch (err) {
-            throw new RepositoryGenericError(
-                'Error creating review from database',
-            );
+            if (err instanceof ConflictException) {
+                throw err;
+            } else {
+                throw new RepositoryGenericError(
+                    'Error creating review from database',
+                );
+            }
         }
     }
 
@@ -80,15 +97,19 @@ export class MoviereviewsService {
         try {
             const found = await this.movieReviewRepository.findOneBy({ id });
             if (!found) {
-                throw new RepositoryGenericError(
+                throw new NotFoundException(
                     'Error getting review from database',
                 );
             }
             return found;
         } catch (err) {
-            throw new RepositoryGenericError(
-                'Error getting review from database',
-            );
+            if (err instanceof NotFoundException) {
+                throw err;
+            } else {
+                throw new RepositoryGenericError(
+                    'Error getting review from database',
+                );
+            }
         }
     }
 
@@ -96,15 +117,19 @@ export class MoviereviewsService {
         try {
             const result = await this.movieReviewRepository.delete({ id });
             if (result.affected === 0) {
-                throw new RepositoryGenericError(
+                throw new NotFoundException(
                     'Error deleting review from database',
                 );
             }
             return;
         } catch (err) {
-            throw new RepositoryGenericError(
-                'Error deleting review from database',
-            );
+            if (err instanceof NotFoundException) {
+                throw err;
+            } else {
+                throw new RepositoryGenericError(
+                    'Error deleting review from database',
+                );
+            }
         }
     }
 
@@ -119,17 +144,19 @@ export class MoviereviewsService {
                 where: { id },
             });
             if (!found) {
-                throw new RepositoryGenericError(
-                    'Review not found on database',
-                );
+                throw new NotFoundException('Review not found on database');
             }
             found.notes = notes;
 
             return await this.movieReviewRepository.save(found);
         } catch (err) {
-            throw new RepositoryGenericError(
-                'Error updating review from database',
-            );
+            if (err instanceof NotFoundException) {
+                throw err;
+            } else {
+                throw new RepositoryGenericError(
+                    'Error updating review from database',
+                );
+            }
         }
     }
 
