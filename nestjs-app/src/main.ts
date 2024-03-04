@@ -4,14 +4,15 @@ import { ValidationPipe } from '@nestjs/common';
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-      forbidNonWhitelisted: true,
-    }),
-  );
-  await app.listen(3001);
+    const app = await NestFactory.create(AppModule);
+    app.useGlobalPipes(
+        new ValidationPipe({
+            whitelist: true,
+            transform: true,
+            forbidNonWhitelisted: true,
+        }),
+    );
+
+    await app.listen(3001);
 }
 bootstrap();

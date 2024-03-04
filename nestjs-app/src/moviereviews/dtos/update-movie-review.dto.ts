@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class UpdateMovieReviewDto {
-  @IsString()
-  @IsNotEmpty()
-  notes: string;
+    @IsString()
+    @IsNotEmpty()
+    notes: string;
 }
