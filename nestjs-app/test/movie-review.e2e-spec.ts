@@ -189,4 +189,36 @@ describe('MovieReviewController (e2e)', () => {
             );
         });
     });
+    describe('/movie-review/:id (DELETE)', () => {
+        it('should delete a movie review for a valid id', async () => {
+            const id = '1';
+            mockMovieReviewRepository.delete.mockResolvedValue({ affected: 1 });
+
+            const response = await request(app.getHttpServer()).delete(
+                `/movie-reviews/${id}`,
+            );
+            expect(response.status).toBe(200);
+        });
+
+        it('should return 404 for a non-existing movie review', async () => {
+            const id = 'non-existing-id';
+            mockMovieReviewRepository.delete.mockResolvedValue({ affected: 0 });
+            const response = await request(app.getHttpServer()).delete(
+                `/movie-reviews/${id}`,
+            );
+            expect(response.status).toBe(404);
+        });
+
+        it('should throw RepositoryGenericError if an unexpected error occurs', async () => {
+            const id = '1';
+            mockMovieReviewRepository.delete.mockRejectedValue(
+                new Error('Unexpected Error'),
+            );
+
+            const response = await request(app.getHttpServer()).delete(
+                `/movie-reviews/${id}`,
+            );
+            expect(response.status).toBeGreaterThanOrEqual(500);
+        });
+    });
 });
