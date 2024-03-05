@@ -140,4 +140,53 @@ describe('MovieReviewController (e2e)', () => {
             expect(response.status).toBeGreaterThanOrEqual(500);
         });
     });
+    describe('/movie-reviews/:id (GET)', () => {
+        it('should return a movie review for a valid id', async () => {
+            const id = '1';
+            const data = dummyMovieReviews[0];
+            mockMovieReviewRepository.findOneBy.mockResolvedValue(data);
+
+            const response = await request(app.getHttpServer()).get(
+                `/movie-reviews/${id}`,
+            );
+
+            expect(response.status).toBe(200);
+            expect(response.body).toEqual(dummyMovieReviews[0]);
+        });
+
+        it('should return 404 for a non-existing movie review', async () => {
+            const id = 'non-existing-id';
+            mockMovieReviewRepository.findOneBy.mockResolvedValue(null);
+
+            const response = await request(app.getHttpServer()).get(
+                `/movie-reviews/${id}`,
+            );
+
+            expect(response.status).toBe(404);
+            expect(response.body).toEqual({
+                statusCode: 404,
+                message: 'Error getting review from database',
+                error: 'Not Found',
+            });
+        });
+
+        it('should throw RepositoryGenericError if an unexpected error occurs', async () => {
+            const id = '1';
+            mockMovieReviewRepository.findOneBy.mockRejectedValue(
+                new Error('Unexpected Error'),
+            );
+
+            const response = await request(app.getHttpServer()).get(
+                `/movie-reviews/${id}`,
+            );
+
+            expect(response.status).toBeGreaterThanOrEqual(500);
+            expect(response.body).toEqual(
+                expect.objectContaining({
+                    statusCode: expect.any(Number),
+                    message: expect.any(String),
+                }),
+            );
+        });
+    });
 });
