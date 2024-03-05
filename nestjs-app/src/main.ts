@@ -13,9 +13,9 @@ async function bootstrap() {
         }),
     );
     const config = new DocumentBuilder()
-        .setTitle('Documentação com Swagger - Fábrica de Sinapse')
+        .setTitle('Documentação - Movie Reviews API')
         .setDescription(
-            'O Swagger (aka OpenApi) é uma biblioteca muito conhecida no universo backend, estando disponível para diversas linguagens e frameworks. Ela gera um site interno no seu backend que descreve, com muitos detalhes, cada endpoint e estrutura de entidades presentes na sua aplicação.',
+            'API de revisões de filmes que permite aos usuários organizar anotações sobre filmes assistidos, integrando-se ao The Open Movie Database (OMDb) para enriquecer cada revisão com detalhes automáticos como data de lançamento e avaliação do IMDb. Funcionalidades incluem criar, listar, visualizar, atualizar e deletar revisões de filmes.',
         )
         .setVersion('1.0')
         .addTag('movie-reviews')
