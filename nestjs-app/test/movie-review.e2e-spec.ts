@@ -221,4 +221,53 @@ describe('MovieReviewController (e2e)', () => {
             expect(response.status).toBeGreaterThanOrEqual(500);
         });
     });
+    describe('/movie-reviews/:id (PATCH)', () => {
+        it('should update movie review notes for a valid id', async () => {
+            const id = '1';
+            const updatedNotes = 'Updated notes here';
+
+            mockMovieReviewRepository.findOne.mockResolvedValue(
+                dummyMovieReviews[0],
+            );
+            mockMovieReviewRepository.save.mockImplementation((review) =>
+                Promise.resolve({ ...review }),
+            );
+
+            const response = await request(app.getHttpServer())
+                .patch(`/movie-reviews/${id}`)
+                .send({ notes: updatedNotes });
+
+            expect(response.status).toBe(200);
+            expect(response.body.notes).toEqual(updatedNotes);
+            expect(mockMovieReviewRepository.save).toHaveBeenCalledWith({
+                ...dummyMovieReviews[0],
+                notes: updatedNotes,
+            });
+        });
+
+        it('should return 404 for a non-existing movie review', async () => {
+            const nonExistingId = 'non-existing-id';
+            mockMovieReviewRepository.findOne.mockResolvedValue(null);
+
+            const response = await request(app.getHttpServer())
+                .patch(`/movie-reviews/${nonExistingId}`)
+                .send({ notes: 'New notes' });
+
+            expect(response.status).toBe(404);
+        });
+
+        it('should throw RepositoryGenericError if an unexpected error occurs', async () => {
+            const id = '1';
+            const updatedNotes = 'Updated notes here';
+            mockMovieReviewRepository.findOne.mockRejectedValue(
+                new Error('Unexpected Error'),
+            );
+
+            const response = await request(app.getHttpServer())
+                .patch(`/movie-reviews/${id}`)
+                .send({ notes: updatedNotes });
+
+            expect(response.status).toBeGreaterThanOrEqual(500);
+        });
+    });
 });
