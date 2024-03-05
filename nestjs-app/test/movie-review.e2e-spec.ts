@@ -7,10 +7,12 @@ import { MovieReview } from '../src/moviereviews/entities/movie-review';
 import { OmdbService } from '../src/omdb/omdb.service';
 import { dummyMovieReviews } from '../src/moviereviews/entities/dummy-movie-reviews';
 import { OmdbModule } from '../src/omdb/omdb.module';
+import { CreateMovieReviewDomainDto } from '../src/moviereviews/dtos/create-movie-review.dto';
+import { dummyOmdbResponse } from '../src/omdb/entities/dummy-omdb-response';
 
 describe('MovieReviewController (e2e)', () => {
     let app: INestApplication;
-
+    let omdbService: OmdbService;
     const mockMovieReviewRepository = {
         createQueryBuilder: jest.fn(() => ({
             where: jest.fn().mockReturnThis(),
@@ -39,6 +41,7 @@ describe('MovieReviewController (e2e)', () => {
             .compile();
 
         app = moduleFixture.createNestApplication();
+        omdbService = moduleFixture.get<OmdbService>(OmdbService);
         await app.init();
     });
 
@@ -64,6 +67,77 @@ describe('MovieReviewController (e2e)', () => {
             const expectedTotalResults =
                 response.body.totalPages * response.body.total;
             expect(response.body.data).toHaveLength(expectedTotalResults);
+        });
+    });
+
+    describe('/movie-reviews (POST)', () => {
+        it('should create a new movie review', async () => {
+            jest.spyOn(omdbService, 'searchMovies').mockResolvedValue(
+                dummyOmdbResponse,
+            );
+
+            const createReviewDto: CreateMovieReviewDomainDto = {
+                title: 'King Kong',
+                notes: 'This is a test movie review.',
+            };
+
+            mockMovieReviewRepository.findOne = jest
+                .fn()
+                .mockResolvedValue(null);
+            mockMovieReviewRepository.save = jest
+                .fn()
+                .mockImplementation((movieReview) =>
+                    Promise.resolve(movieReview),
+                );
+
+            const response = await request(app.getHttpServer())
+                .post('/movie-reviews')
+                .send(createReviewDto);
+
+            expect(response.status).toBe(201);
+            expect(response.body.title).toEqual(createReviewDto.title);
+            expect(response.body.notes).toEqual(createReviewDto.notes);
+        });
+
+        it('should throw ConflictException if a review for the movie already exists', async () => {
+            jest.spyOn(omdbService, 'searchMovies').mockResolvedValue(
+                dummyOmdbResponse,
+            );
+
+            const createReviewDto: CreateMovieReviewDomainDto = {
+                title: 'King Kong',
+                notes: 'This is a duplicate movie review.',
+            };
+
+            mockMovieReviewRepository.findOne = jest.fn().mockResolvedValue({
+                id: 'existing-review-id',
+                title: 'King Kong',
+            });
+            const response = await request(app.getHttpServer())
+                .post('/movie-reviews')
+                .send(createReviewDto);
+
+            expect(response.status).toBe(409);
+            expect(response.body.error).toEqual('Conflict');
+            expect(response.body.message).toContain(
+                'A review for this movie already exists',
+            );
+        });
+
+        it('should throw RepositoryGenericError if an unexpected error occurs during review creation', async () => {
+            mockMovieReviewRepository.findOne.mockRejectedValue(
+                new Error('Unexpected Error'),
+            );
+
+            const createReviewDto: CreateMovieReviewDomainDto = {
+                title: 'Test Movie',
+                notes: 'This is a test movie review.',
+            };
+            const response = await request(app.getHttpServer())
+                .post('/movie-reviews')
+                .send(createReviewDto);
+
+            expect(response.status).toBeGreaterThanOrEqual(500);
         });
     });
 });
